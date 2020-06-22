@@ -7,71 +7,30 @@ from bokeh.layouts import widgetbox, row
 import pandas as pd
 import numpy as np
 import itertools
-
-def get_countries_data():
-    
-    # Get Johns Hopkins data from GitHub
-    confirmed_global_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
-    confirmed_global_df = pd.read_csv(confirmed_global_url)
-
-    worldwide_cases_url = 'https://opendata.ecdc.europa.eu/covid19/casedistribution/csv'
-    worldwide_cases_df = pd.read_csv(worldwide_cases_url)
-    worldwide_cases_df[worldwide_cases_df['countriesAndTerritories']=='China']
-
-    countries_data = confirmed_global_df
-
-    return(countries_data)
-
-def prep_countries_data(countries_data):
-
-    # Preparing data for no. cases
-    cases_df = countries_data.copy()
-
-    cases_df.drop(columns=['Province/State', 'Lat', 'Long'], inplace=True)
-
-    cases_df = pd.melt(frame=cases_df,
-                       id_vars=['Country/Region'],
-                       var_name='Date',
-                       value_name='Cases')
-
-    cases_df['Date'] = pd.to_datetime(cases_df['Date'],
-                                      format='%m/%d/%y')
-
-    cases_df = cases_df.groupby(
-                        ['Country/Region', 'Date']).sum()
-
-    cases_df = cases_df.unstack(level=0)['Cases']
-
-    # Comparing trajectories of countries
-
-    min_cases = 100 # case threshold to be considered infected
-    data = {}
-
-    for country in cases_df:
-        
-        country_df = cases_df[country][cases_df[country] > min_cases]
-        country_df.index = range(len(country_df))
-        
-        if len(country_df) > 0:
-            data[country_df.name] = country_df
-        
-    trajectories_df = pd.DataFrame(data)
-
-    return(trajectories_df)
+from sqlalchemy import create_engine
+import os
 
 def build_countries_tab():
 
-    countries_data = get_countries_data()
-    trajectories_df = prep_countries_data(countries_data)
+    connection_uri = os.environ['connection_uri']
+    db_engine = create_engine(connection_uri)
+
+    traj_df = pd.read_sql(
+        'SELECT * FROM country_trajectories_view',
+        db_engine)
 
     # Creating trajectories plot
 
-    xs = [trajectories_df.index.values] * len(trajectories_df.columns)
-    ys = [trajectories_df[name].values for name in trajectories_df]
+    xs = []
+    ys = []
+    countries = []
+    colors = []
 
-    countries = [name for name in trajectories_df]
-
-    colors = [Spectral11[i%11] for i in range(len(trajectories_df.columns))]
+    for index, (region, region_df) in enumerate(traj_df.groupby('region')):
+        xs.append(region_df['days_since_arrival'].values - 1)
+        ys.append(region_df['cases'].values)
+        countries.append(region)
+        colors.append(Spectral11[index%11])
 
     source = ColumnDataSource(data={
                     'xs' : xs,
@@ -103,13 +62,16 @@ def build_countries_tab():
         
         selected_countries = multiselect.value
 
-        filtered_df = trajectories_df[selected_countries]
+        filtered_df = traj_df.loc[traj_df.region.isin(selected_countries)]
 
-        xs_new = [filtered_df.index.values] * len(filtered_df.columns)
+        xs_new = []
+        ys_new = []
+        countries_new = []
 
-        ys_new = [filtered_df[name].values for name in filtered_df]
-
-        countries_new = [name for name in filtered_df]
+        for region, region_df in filtered_df.groupby('region'):
+            xs_new.append(region_df['days_since_arrival'].values -1)
+            ys_new.append(region_df['cases'].values)
+            countries_new.append(region)
         
         countries_subset = [countries.index(country) for country in selected_countries]
         colors_new = [colors[i] for i in countries_subset]

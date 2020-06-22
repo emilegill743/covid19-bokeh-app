@@ -9,71 +9,35 @@ import numpy as np
 import math
 from datetime import datetime, timedelta
 from bokeh.io import curdoc
-
-def get_data():
-
-    confirmed_global_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
-    confirmed_global_df = pd.read_csv(confirmed_global_url)
-
-    return(confirmed_global_df)
-
-def transform_data(data, date='latest'):
-
-    cases_df = data.copy()
-
-    cases_df = cases_df.loc[
-                    ~(cases_df[['Lat', 'Long']] == 0).all(axis=1)
-                    ]
-
-    cases_df = pd.melt(frame=cases_df,
-                       id_vars=['Country/Region',
-                                'Province/State',
-                                'Lat',
-                                'Long'],
-                       var_name='Date',
-                       value_name='Cases')
-    
-    cases_df['Date'] = pd.to_datetime(cases_df['Date'])
-
-    if date == 'latest':
-        cases_df = cases_df[
-                        cases_df.Date == max(cases_df.Date)
-                        ]
-    else:
-        cases_df = cases_df[
-                        cases_df.Date == date
-                        ]
-
-    cases_df['Size'] = cases_df.Cases.apply(
-                            lambda x : math.log(x, 1.2) if x > 0 else 0)
-    
-    cases_df['Province/State'].fillna(value='N/A', inplace=True)
-    
-    return(cases_df)
-
-
+import os
+from sqlalchemy import create_engine
 
 def build_global_tab():
     
     geo_data_shp = r'C:\Users\emile\OneDrive\Documents\GitHub\covid-19-app\geo_data\ne_50m_land\ne_50m_land.shp'
-    
     geo_data_gdf = gpd.read_file(geo_data_shp)
-
     geosource = GeoJSONDataSource(geojson = geo_data_gdf.to_json())
 
-    cases_data = get_data()
-    cases_data = transform_data(cases_data)
+    connection_uri = os.environ['connection_uri']
+    db_engine = create_engine(connection_uri)
 
-    cases_cds = ColumnDataSource(cases_data)
+    geo_evol_df = pd.read_sql(
+        'SELECT * FROM geo_time_evolution_view',
+        db_engine)
+
+    geo_snapshot_df = geo_evol_df[
+                        geo_evol_df.date == min(geo_evol_df.date)]
+
+    cases_cds = ColumnDataSource(geo_snapshot_df)
 
     p = figure(plot_height = 600 , plot_width = 950)
 
     geo_patches = p.patches('xs', 'ys', source=geosource)
 
     cases_circles = p.circle(
-                        x='Long',
-                        y='Lat',
-                        size='Size',
+                        x='long',
+                        y='lat',
+                        size='size',
                         source=cases_cds,
                         color='red',
                         alpha=0.3)
@@ -81,44 +45,32 @@ def build_global_tab():
     # Adding hover tool
     hover = HoverTool(
                 tooltips=[
-                    ('Country/Region', '@{Country/Region}'),
-                    ('Province/State', '@{Province/State}'),
-                    ('Cases', '@Cases')
+                    ('Country/Region', '@region'),
+                    ('Province/State', '@province'),
+                    ('Cases', '@cases')
                     ],
-                renderers=[cases_circles]
-                )
+                renderers=[cases_circles])
+
     p.add_tools(hover)
 
-    date_range = pd.melt(
-                        frame=get_data(),
-                        id_vars=[
-                            'Country/Region',
-                            'Province/State',
-                            'Lat',
-                            'Long'],
-                        var_name='Date',
-                        value_name='Cases').Date.unique()
+    date_range = geo_evol_df.date.unique()
     
-    date_range = [datetime.strptime(date_val, '%m/%d/%y') for date_val in date_range]
+    date_range = [pd.Timestamp(date_val) for date_val in date_range]
 
     date_slider = DateSlider(
-        title="Date",
-        start=min(date_range),
-        end=max(date_range),
-        value= max(date_range)
-    )
+                    title="Date",
+                    start=min(date_range),
+                    end=max(date_range),
+                    value= min(date_range))
 
     def date_slider_callback(attr, old, new):
         
         slider_date = date_slider.value
+        
+        geo_snapshot_df = geo_evol_df[
+                    geo_evol_df.date == pd.Timestamp(slider_date)]
 
-        data = get_data()
-        data = transform_data(
-                    data,
-                    date=pd.Timestamp(slider_date)
-                    )
-
-        cases_cds.data = data
+        cases_cds.data = geo_snapshot_df
 
     date_slider.on_change('value', date_slider_callback)
 
@@ -134,7 +86,7 @@ def build_global_tab():
         global callback_id
         if button.label == '► Play':
             button.label = '❚❚ Pause'
-            callback_id = curdoc().add_periodic_callback(animate_update, 200)
+            callback_id = curdoc().add_periodic_callback(animate_update, 100)
         else:
             button.label = '► Play'
             curdoc().remove_periodic_callback(callback_id)
