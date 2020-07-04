@@ -1,7 +1,7 @@
 from bokeh.io import curdoc
 from bokeh.models import (Div, ColumnDataSource, DatetimeTickFormatter,
-                         DaysTicker, HoverTool, Span, Label, Title, Tabs)
-from bokeh.models.widgets import Panel
+                         DaysTicker, HoverTool, Span, Label, Title)
+from bokeh.models.widgets import Panel, Tabs
 from bokeh.layouts import row
 from bokeh.plotting import figure
 from bokeh.palettes import viridis
