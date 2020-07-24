@@ -301,11 +301,8 @@ def create_data_files():
 
     data_views = [
         'country_trajectories',
-        'geo_time_evolution_cases',
-        'geo_time_evolution_new_cases',
-        'geo_time_evolution_deaths',
-        'geo_time_evolution_new_deaths',
-        'geo_time_evolution'
+        'geo_time_evolution',
+        'global_by_day'
         ]
 
     for view in data_views:

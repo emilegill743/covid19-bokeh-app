@@ -1,2 +1,5 @@
 run.sh
 etl.sh
+__pycache__
+.vscode
+.pyc

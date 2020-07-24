@@ -110,7 +110,9 @@ def countries_tab():
     select_all_button.on_click(select_all_button_callback)
 
     # Add the plot to the current document and add a title
-    layout = row(widgetbox(clear_button, select_all_button, multiselect), plot)
+    layout = row(
+                widgetbox(clear_button, select_all_button, multiselect),
+                plot)
 
     # Creating countries tab
     countries_tab = Panel(child=layout, title='Countries', name='countries_tab')
@@ -199,8 +201,11 @@ def global_tab():
                 height=0.5,
                 line_color='white')
 
-    labels = LabelSet(x='cases', y='index', text='region', text_font_size='10pt', text_color='white', level='glyph',
-              x_offset=5, y_offset=0, source=countries_cds, render_mode='canvas')
+    labels = LabelSet(
+                x='cases', y='index', text='region',
+                text_font_size='10pt', text_color='white',
+                x_offset=5, y_offset=0, source=countries_cds,
+                level='glyph', render_mode='canvas')
 
     p2.add_layout(labels)
 
