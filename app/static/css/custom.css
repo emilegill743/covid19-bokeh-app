@@ -17,3 +17,19 @@
     background-color: #2f2f2f;
     color: #a1a6a9
   }
+
+
+.bk-root .bk-tabs-header .bk-headers-wrapper {
+  color: #bdbdbf;
+}
+
+@media (max-width:850px) {
+  .nav {
+   display:block;
+  }
+}
+
+.navbar {
+  padding:0rem 0rem;
+ }
+ 

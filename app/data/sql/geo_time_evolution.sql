@@ -57,11 +57,11 @@ cases_deaths AS (
         AND
         cases.region = deaths.region
         AND
-        cases.province = deaths.province
-        AND
-        cases.lat = deaths.lat
-        AND
-        cases.long = deaths.long)
+        cases.province = deaths.province)
+        -- AND
+        -- cases.lat = deaths.lat
+        -- AND
+        -- cases.long = deaths.long)
 -- Calculating daily new cases/deaths
 SELECT
     date, region, province, lat, long, cases, deaths,

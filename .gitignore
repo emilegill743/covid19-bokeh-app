@@ -3,3 +3,4 @@ etl.sh
 __pycache__
 .vscode
 .pyc
+venv

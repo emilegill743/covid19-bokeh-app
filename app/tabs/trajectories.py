@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
+
 def build_trajectories_tab():
 
     # Reading data
@@ -28,13 +29,13 @@ def build_trajectories_tab():
         xs.append(region_df['days_since_arrival'].values - 1)
         ys.append(region_df['cases'].values)
         countries.append(region)
-        colors.append(Spectral11[index%11])
+        colors.append(Spectral11[index % 11])
 
     source = ColumnDataSource(data={
-                    'xs' : xs,
-                    'ys' : ys,
-                    'country' : countries,
-                    'color' : colors})
+                    'xs': xs,
+                    'ys': ys,
+                    'country': countries,
+                    'color': colors})
 
     plot = figure(title='Country Trajectories',
                   width=600,
@@ -74,18 +75,19 @@ def build_trajectories_tab():
         countries_new = []
 
         for region, region_df in filtered_df.groupby('region'):
-            xs_new.append(region_df['days_since_arrival'].values -1)
+            xs_new.append(region_df['days_since_arrival'].values - 1)
             ys_new.append(region_df['cases'].values)
             countries_new.append(region)
         
-        countries_subset = [countries.index(country) for country in selected_countries]
+        countries_subset = [countries.index(country) for country
+                            in selected_countries]
+
         colors_new = [colors[i] for i in countries_subset]
 
-        new_data = data={
-                    'xs' : xs_new,
-                    'ys' : ys_new,
-                    'country' : countries_new,
-                    'color' : colors_new}
+        new_data = data = {'xs': xs_new,
+                           'ys': ys_new,
+                           'country': countries_new,
+                           'color': colors_new}
         
         source.data = new_data
 
