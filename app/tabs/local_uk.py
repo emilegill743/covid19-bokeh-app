@@ -13,7 +13,7 @@ import json
 from datetime import timedelta
 
 
-def build_local_uk_tab():
+def build_local_uk_tab(): 
 
     # Importing geographical shapefile for local authority boundaries
     root_dir = Path(__file__).parent.parent

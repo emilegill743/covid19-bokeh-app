@@ -53,4 +53,5 @@ SELECT
 FROM cases_deaths
 INNER JOIN continents
 	ON cases_deaths.region = continents.country_region
+WHERE continent <> 'N/A'
 GROUP BY date, continent

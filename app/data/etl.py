@@ -450,7 +450,7 @@ def local_uk_data_etl():
     load_data(data)
 
 
-@etl_decorator():
+@etl_decorator
 def global_vaccinations():
     
     global_vaccinations_url = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
@@ -468,6 +468,7 @@ def create_data_files():
         'country_trajectories',
         'geo_time_evolution',
         'global_by_day',
+        'continents_by_day',
         'local_uk'
         ]
 
