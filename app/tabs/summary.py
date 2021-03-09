@@ -3,6 +3,7 @@ from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.models.widgets import Tabs, Panel
 from bokeh.plotting import figure
 from bokeh.layouts import widgetbox
+from bokeh.palettes import Spectral11
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -40,32 +41,60 @@ def build_summary_tab():
                 "global_deaths": f"{int(global_deaths):,}",
                 "new_deaths": f"{int(new_deaths):,}"}
 
+# Import continents by day dataset
+    continents_by_day_df = pd.read_csv(
+                            root_dir.joinpath(
+                                'data', 'data_view',
+                                'continents_by_day.csv'))
+ 
+    continents_by_day_df.date = pd.to_datetime(continents_by_day_df.date)
+
     # Daily cases/deaths plots
     panel_dict = {}
     data_views = ["cases", "new_cases", "deaths", "new_deaths"]
 
     for data_view in data_views:
-        
+
+        continents_pivot_df = continents_by_day_df.pivot(
+                                                    index='date',
+                                                    columns='continent',
+                                                    values=data_view)
+
+        continent_names = list(continents_pivot_df.columns)
+
+        continents_pivot_df['total'] = continents_pivot_df.sum(axis=1)
+
+        continents_by_day_cds = ColumnDataSource(continents_pivot_df)
+
         # Creating figure
         fig = figure(
                 name=f"{data_view}_vbar",
                 sizing_mode="scale_width",
                 x_axis_type="datetime",
                 plot_height=200)
+
+        colors = [Spectral11[i] for i in range(len(continent_names))]
         
         # Adding vbar for data view
-        vbar = fig.vbar(
+        vbar = fig.vbar_stack(
+                    continent_names,
                     x="date",
-                    top=data_view,
                     width=timedelta(days=0.5),
-                    source=global_by_day_cds)
+                    color=colors,
+                    legend_label=continent_names,
+                    source=continents_by_day_cds)
+        
+        fig.legend.location = "top_left"
 
         # Adding hover tool
         hover = HoverTool(
                     tooltips=[
                         ("Date", "@date{%F}"),
+                        ("Continent", "$name"),
                         (f"{data_view.replace('_', ' ').title()}",
-                         f"@{data_view}{{(0.0 a)}}")],
+                         "@$name{(0.0 a)}"),
+                        (f"Global {data_view.replace('_', ' ').title()}",
+                         "@total{(0.0 a)}")],
                     formatters={"@date": "datetime"})
 
         fig.add_tools(hover)

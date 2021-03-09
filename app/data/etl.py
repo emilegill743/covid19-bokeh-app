@@ -451,10 +451,42 @@ def local_uk_data_etl():
 
 
 @etl_decorator
-def global_vaccinations():
+def owid_global_vaccinations_etl():
     
-    global_vaccinations_url = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
+    # Extract owid vaccinations data
+    owid_global_vaccinations_url = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
+    owid_global_vaccinations_df  = pd.read_csv(owid_global_vaccinations_url)
 
+    # Load owid vaccinations data
+    connection_uri = os.environ['connection_uri']
+    db_engine = create_engine(connection_uri)
+
+    owid_global_vaccinations_df.to_sql(
+        name="owid_global_vaccinations",
+        con=db_engine,
+        if_exists="replace",
+        index=False,
+        method='multi')
+
+
+@etl_decorator
+def bloomberg_global_vaccinations_etl():
+    
+    # Extract owid vaccinations data
+    bloomberg_global_vaccinations_url = "https://raw.githubusercontent.com/BloombergGraphics/covid-vaccine-tracker-data/master/data/current-global.csv"
+    bloomberg_global_vaccinations_df  = pd.read_csv(bloomberg_global_vaccinations_url)
+
+    # Load owid vaccinations data
+    connection_uri = os.environ['connection_uri']
+    db_engine = create_engine(connection_uri)
+
+    bloomberg_global_vaccinations_df.to_sql(
+        name="bloomberg_global_vaccinations",
+        con=db_engine,
+        if_exists="replace",
+        index=False,
+        method='multi')
+    
 
 @etl_decorator
 def create_data_files():
@@ -491,6 +523,8 @@ def etl():
     jhu_us_deaths_etl()
     us_states_etl()
     local_uk_data_etl()
+    owid_global_vaccinations_etl()
+    bloomberg_global_vaccinations_etl()
     create_data_files()
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 /*Preparing continents_by_day dataset
 with cases, deaths, new_cases, new_deaths
-by continentm by day*/
+by continents by day*/
 
 WITH
     cases AS ( 
@@ -36,16 +36,26 @@ WITH
         ORDER BY cases.date, cases.region),
 		
 	continents AS (
-		SELECT
+		SELECT DISTINCT
 			country_region,
 			continent
 		FROM
-			jhu_lookup)
+			jhu_lookup
+        WHERE province_state IS NULL)
 
 SELECT
-    date, continent,
-	sum(cases) AS total_cases,
-	sum(deaths) AS total_deaths,
+    date,
+    CASE
+		WHEN continent = 'AF' THEN 'Africa'
+		WHEN continent = 'AS' THEN 'Asia'
+		WHEN continent = 'EU' THEN 'Europe'
+		WHEN continent = 'NA' THEN 'North America'
+		WHEN continent = 'OC' THEN 'Oceania'
+		WHEN continent = 'SA' THEN 'South America'
+		ELSE continent
+	END AS continent,
+	sum(cases) AS cases,
+	sum(deaths) AS deaths,
     sum(cases) - lag(sum(cases))
         OVER(PARTITION BY continent ORDER BY date) AS new_cases,
     sum(deaths) - lag(sum(deaths))

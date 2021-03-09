@@ -31,7 +31,7 @@ def build_time_evolution_tab():
                             'geo_time_evolution.csv'))
     
     # Selecting earliest snapshot
-    time_evol_df.date = pd.to_datetime(time_evol_df.date)
+    time_evol_df.date = pd.to_datetime(time_evol_df.date, format="%Y-%m-%d")
 
     snapshot_df = time_evol_df[
                         time_evol_df.date == min(time_evol_df.date)]
@@ -40,8 +40,8 @@ def build_time_evolution_tab():
                             root_dir.joinpath(
                                 'data', 'data_view',
                                 'global_by_day.csv'))
- 
-    global_by_day_df.date = pd.to_datetime(global_by_day_df.date)
+
+    global_by_day_df.date = pd.to_datetime(global_by_day_df.date, format="%Y-%m-%d")
     global_totals_df = global_by_day_df.loc[
                             global_by_day_df.date == min(time_evol_df.date)]
     global_cases = int(global_totals_df.iloc[0]['cases'])
@@ -154,7 +154,7 @@ def build_time_evolution_tab():
             data_view = f"new_{data_view}"
 
         # Determine date selection
-        slider_date = date_slider.value
+        slider_date = date_slider.value_as_datetime.date()
 
         # Filter data for selected date
         snapshot_df = time_evol_df[
@@ -281,8 +281,9 @@ def build_time_evolution_tab():
 
     def animate():
         def animate_update():
-            date = date_slider.value + timedelta(days=1)
-            if pd.Timestamp(date) >= max(date_range):
+            date = date_slider.value_as_datetime.date() + timedelta(days=1)
+            date = pd.Timestamp(date)
+            if date >= max(date_range):
                 date = min(date_range)
             date_slider.value = date
 
