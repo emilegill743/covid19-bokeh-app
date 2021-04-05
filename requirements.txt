@@ -19,7 +19,7 @@ MarkupSafe==1.1.1
 munch==2.5.0
 numpy
 packaging==20.9
-pandas==1.2.2
+pandas
 Pillow==8.1.0
 pluggy==0.13.1
 pprintpp==0.4.0
