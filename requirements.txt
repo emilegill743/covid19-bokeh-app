@@ -9,7 +9,7 @@ cligj==0.7.1
 colorama==0.4.4
 coverage==5.4
 Fiona
-GDAL
+# GDAL
 geopandas==0.8.2
 idna==2.10
 importlib-metadata==3.7.0
