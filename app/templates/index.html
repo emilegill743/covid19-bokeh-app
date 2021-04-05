@@ -5,9 +5,7 @@
   <title>Bootstrap Example</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"> -->
   <link rel="stylesheet" href="app/static/css/bootstrap.min.css">
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
   <link rel="stylesheet" href="app/static/css/custom.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -78,6 +76,7 @@
         <div class="col-md-6">
           <div class="card card-body">
             <h4 style="color:#bdbdbf">Global cases:</h4>
+            <h6 style="color:#bdbdbf">(as of {{ summary["latest_cases_date"] }})</h6>
             <h3>{{ summary["global_cases"] }}</h3>
             <p style="color:#ff6b6b;">+{{ summary["new_cases"] }}</p>
             <div>{{ embed(roots.daily_cases_tabs) }}</div>
@@ -86,9 +85,21 @@
         <div class="col-md-6">
           <div class="card card-body">
             <h4 style="color:#bdbdbf">Global deaths:</h4>
+            <h6 style="color:#bdbdbf">(as of {{ summary["latest_cases_date"] }})</h6>
             <h3>{{ summary["global_deaths"] }}</h3>
             <p style="color:#ff6b6b;">+{{ summary["new_deaths"] }}</p>
             <div>{{ embed(roots.daily_deaths_tabs) }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card card-body">
+            <h4 style="color:#bdbdbf">Global Vaccinations:</h4>
+            <h6 style="color:#bdbdbf">(as of {{ summary["latest_vaccinations_date"] }})</h6>
+            <h3>{{ summary["global_vaccinations"] }}</h3>
+            <p style="color:#ff6b6b;">+{{ summary["new_vaccinations"] }}</p>
+            <div>{{ embed(roots.daily_vaccinations_tabs) }}</div>
           </div>
         </div>
       </div>

@@ -457,6 +457,8 @@ def owid_global_vaccinations_etl():
     owid_global_vaccinations_url = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
     owid_global_vaccinations_df  = pd.read_csv(owid_global_vaccinations_url)
 
+    owid_global_vaccinations_df.date = pd.to_datetime(owid_global_vaccinations_df.date)
+
     # Load owid vaccinations data
     connection_uri = os.environ['connection_uri']
     db_engine = create_engine(connection_uri)
@@ -501,7 +503,9 @@ def create_data_files():
         'geo_time_evolution',
         'global_by_day',
         'continents_by_day',
-        'local_uk'
+        'local_uk',
+        'vaccinations_by_country_by_day',
+        'vaccinations_by_continent_by_day'
         ]
 
     for view in data_views:
