@@ -1,4 +1,0 @@
-data:
-    https://geoportal.statistics.gov.uk/datasets/1d78d47c87df4212b79fe2323aae8e08_0/data?geometry=-2.416%2C51.135%2C1.756%2C51.735
-
-simplified to 5% using: https://mapshaper.org/
