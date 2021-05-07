@@ -13,42 +13,30 @@ import json
 from datetime import timedelta
 
 
-def build_local_uk_tab(): 
+def build_local_uk_tab():
 
-    # Importing geographical shapefile for local authority boundaries
-    root_dir = Path(__file__).parent.parent
+    s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
 
-    la_boundaries_gdf = (gpd.read_file(
-                                root_dir.joinpath(
-                                    'data', 'geo_data',
-                                    'la_districts_dec19',
-                                    'simplified',
-                                    'Local_Authority_Districts__December_2019'
-                                    '__Boundaries_UK_BFC.shp'))
-                         .loc[:, ['lad19cd', 'lad19nm', 'geometry']])
+    la_boundaries_gdf = gpd.read_file(
+                               f'{s3_root}/data/_geo_data/la_districts_dec19.zip'
+                               ).loc[:, ['lad19cd', 'lad19nm', 'geometry']]
 
     # Importing uk local authority data
-    la_cases_df = pd.read_csv(
-                        root_dir.joinpath(
-                            'data', 'data_view',
-                            'local_uk.csv'))
+    la_cases_df = pd.read_csv(f'{s3_root}/data/local_uk.csv')
 
     # Filter for latest date
     la_cases_latest_df = la_cases_df.loc[
                             la_cases_df.date == la_cases_df.date.max()]
 
     # Import local authority population data
-    la_pop_df = (pd.read_csv(
-                    root_dir.joinpath(
-                        'data', 'geo_data',
-                        'local_authority_populations.csv'))
-                 .loc[:, ['code', 'population']])
-    
+    la_pop_df = pd.read_csv(f'{s3_root}/data/local_authority_populations.csv'
+                            ).loc[:, ['code', 'population']]
+
     # Remove commas and convert to numeric dtype
     la_pop_df['population'] = pd.to_numeric(
                                     (la_pop_df['population']
                                         .str.replace(",", "")))
-    
+
     # Merge cases and population datasets
     la_cases_latest_df = la_cases_latest_df.merge(
                                 la_pop_df,
@@ -170,4 +158,3 @@ def build_local_uk_tab():
     # Add the plots to the current document
     curdoc().add_root(local_uk_geo_plot)
     curdoc().add_root(cases_trend_plot)
-

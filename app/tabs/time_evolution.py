@@ -13,40 +13,31 @@ from datetime import datetime, timedelta
 
 
 def build_time_evolution_tab():
-   
-    # Importing geographical shapefile
-    root_dir = Path(__file__).parent.parent
 
-    geo_data_gdf = gpd.read_file(
-                        root_dir.joinpath(
-                            'data', 'geo_data',
-                            'ne_50m_land', 'ne_50m_land.shp'))
+    # Importing geographical shapefile
+    s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
+
+    geo_data_gdf = gpd.read_file(f'{s3_root}/data/_geo_data/ne_50m_land.zip')
 
     geosource = GeoJSONDataSource(geojson=geo_data_gdf.to_json())
 
     # Importing geo-evolutions cases/deaths data
-    time_evol_df = pd.read_csv(
-                        root_dir.joinpath(
-                            'data', 'data_view',
-                            'geo_time_evolution.csv'))
-    
+    time_evol_df = pd.read_csv(f'{s3_root}/data/geo_time_evolution.csv')
+
     # Selecting earliest snapshot
     time_evol_df.date = pd.to_datetime(time_evol_df.date, format="%Y-%m-%d")
 
     snapshot_df = time_evol_df[
                         time_evol_df.date == min(time_evol_df.date)]
 
-    global_by_day_df = pd.read_csv(
-                            root_dir.joinpath(
-                                'data', 'data_view',
-                                'global_by_day.csv'))
+    global_by_day_df = pd.read_csv(f'{s3_root}/data/global_by_day.csv')
 
     global_by_day_df.date = pd.to_datetime(global_by_day_df.date, format="%Y-%m-%d")
     global_totals_df = global_by_day_df.loc[
                             global_by_day_df.date == min(time_evol_df.date)]
     global_cases = int(global_totals_df.iloc[0]['cases'])
     global_deaths = int(global_totals_df.iloc[0]['deaths'])
-    
+
     # Applying bubble-size mapping
     bubble_size = snapshot_df['cases'].apply(
                                             lambda x: 0.5*math.log(x, 1.1)
@@ -149,7 +140,7 @@ def build_time_evolution_tab():
             data_view = "cases"
         elif cases_deaths_button.active == 1:
             data_view = "deaths"
-        
+
         if total_new_button.active == 1:
             data_view = f"new_{data_view}"
 

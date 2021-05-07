@@ -13,13 +13,10 @@ from datetime import datetime, timedelta
 
 def build_summary_tab():
 
-    root_dir = Path(__file__).parent.parent
+    s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
 
     # Import global by day dataset
-    global_by_day_df = pd.read_csv(
-                            root_dir.joinpath(
-                                'data', 'data_view',
-                                'global_by_day.csv'))
+    global_by_day_df = pd.read_csv(f'{s3_root}/data/global_by_day.csv')
 
     global_by_day_df.date = pd.to_datetime(global_by_day_df.date)
 
@@ -63,19 +60,14 @@ def build_summary_tab():
                 "latest_vaccinations_date": latest_vaccinations_date.strftime("%d/%m/%Y")}
 
     # Import continents by day dataset
-    continents_by_day_df = pd.read_csv(
-                            root_dir.joinpath(
-                                'data', 'data_view',
-                                'continents_by_day.csv'))
+    continents_by_day_df = pd.read_csv(f'{s3_root}/data/continents_by_day.csv')
 
     continents_by_day_df.date = pd.to_datetime(continents_by_day_df.date,
                                                format='%Y-%m-%d')
 
     # Adding vaccinations tabs
     vaccinations_by_continent_df = pd.read_csv(
-                                    root_dir.joinpath(
-                                        'data', 'data_view',
-                                        'vaccinations_by_continent_by_day.csv'))
+                                        f'{s3_root}/data/vaccinations_by_continent_by_day.csv')
 
     vaccinations_by_continent_df.date = pd.to_datetime(
                                             vaccinations_by_continent_df.date,
