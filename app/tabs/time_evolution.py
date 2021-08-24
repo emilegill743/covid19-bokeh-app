@@ -10,19 +10,37 @@ from pathlib import Path
 import geopandas as gpd
 import math
 from datetime import datetime, timedelta
+import os
+import boto3
 
 
 def build_time_evolution_tab():
 
+    s3_storage_options = {
+      'key': os.getenv('AWS_ACCESS_KEY_ID'),
+      'secret': os.getenv('AWS_SECRET_ACCESS_KEY')
+    }
+
+    s3_client = boto3.client(
+                    "s3",
+                    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
+
     # Importing geographical shapefile
     s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
 
-    geo_data_gdf = gpd.read_file(f'{s3_root}/data/_geo_data/ne_50m_land.zip')
+    response = s3_client.get_object(
+                Bucket='covid19-bokeh-app',
+                Key="data/_geo_data/ne_50m_land.zip")
+
+    geo_data_gdf = gpd.read_file(response.get("Body"))
 
     geosource = GeoJSONDataSource(geojson=geo_data_gdf.to_json())
 
     # Importing geo-evolutions cases/deaths data
-    time_evol_df = pd.read_csv(f'{s3_root}/data/geo_time_evolution.csv')
+    time_evol_df = pd.read_csv(
+                        f'{s3_root}/data/geo_time_evolution.csv',
+                        storage_options=s3_storage_options)
 
     # Selecting earliest snapshot
     time_evol_df.date = pd.to_datetime(time_evol_df.date, format="%Y-%m-%d")
@@ -30,7 +48,9 @@ def build_time_evolution_tab():
     snapshot_df = time_evol_df[
                         time_evol_df.date == min(time_evol_df.date)]
 
-    global_by_day_df = pd.read_csv(f'{s3_root}/data/global_by_day.csv')
+    global_by_day_df = pd.read_csv(
+                            f'{s3_root}/data/global_by_day.csv',
+                            storage_options=s3_storage_options)
 
     global_by_day_df.date = pd.to_datetime(global_by_day_df.date, format="%Y-%m-%d")
     global_totals_df = global_by_day_df.loc[

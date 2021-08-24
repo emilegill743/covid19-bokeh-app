@@ -11,26 +11,46 @@ from pathlib import Path
 import geopandas as gpd
 import json
 from datetime import timedelta
+import os
+import boto3
 
 
 def build_local_uk_tab():
 
+    s3_storage_options = {
+        'key': os.getenv('AWS_ACCESS_KEY_ID'),
+        'secret': os.getenv('AWS_SECRET_ACCESS_KEY')
+    }
+
+    s3_client = boto3.client(
+                    "s3",
+                    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
+
     s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
 
+    response = s3_client.get_object(
+                    Bucket='covid19-bokeh-app',
+                    Key="data/_geo_data/la_districts_dec19.zip")
+
     la_boundaries_gdf = gpd.read_file(
-                               f'{s3_root}/data/_geo_data/la_districts_dec19.zip'
-                               ).loc[:, ['lad19cd', 'lad19nm', 'geometry']]
+                            response.get("Body")
+                            ).loc[:, ['lad19cd', 'lad19nm', 'geometry']]
 
     # Importing uk local authority data
-    la_cases_df = pd.read_csv(f'{s3_root}/data/local_uk.csv')
+    la_cases_df = pd.read_csv(
+                    f'{s3_root}/data/local_uk.csv',
+                    storage_options=s3_storage_options)
 
     # Filter for latest date
     la_cases_latest_df = la_cases_df.loc[
                             la_cases_df.date == la_cases_df.date.max()]
 
     # Import local authority population data
-    la_pop_df = pd.read_csv(f'{s3_root}/data/local_authority_populations.csv'
-                            ).loc[:, ['code', 'population']]
+    la_pop_df = pd.read_csv(
+                    f'{s3_root}/data/local_authority_populations.csv',
+                    storage_options=s3_storage_options
+                    ).loc[:, ['code', 'population']]
 
     # Remove commas and convert to numeric dtype
     la_pop_df['population'] = pd.to_numeric(

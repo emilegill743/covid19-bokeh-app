@@ -7,16 +7,23 @@ from bokeh.palettes import Spectral11
 import pandas as pd
 import numpy as np
 from pathlib import Path
-import geopandas as gpd
 from datetime import datetime, timedelta
+import os
 
 
 def build_summary_tab():
 
+    s3_storage_options = {
+      'key': os.getenv('AWS_ACCESS_KEY_ID'),
+      'secret': os.getenv('AWS_SECRET_ACCESS_KEY')
+    }
+
     s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
 
     # Import global by day dataset
-    global_by_day_df = pd.read_csv(f'{s3_root}/data/global_by_day.csv')
+    global_by_day_df = pd.read_csv(
+                              f'{s3_root}/data/global_by_day.csv',
+                              storage_options=s3_storage_options)
 
     global_by_day_df.date = pd.to_datetime(global_by_day_df.date)
 
@@ -60,14 +67,17 @@ def build_summary_tab():
                 "latest_vaccinations_date": latest_vaccinations_date.strftime("%d/%m/%Y")}
 
     # Import continents by day dataset
-    continents_by_day_df = pd.read_csv(f'{s3_root}/data/continents_by_day.csv')
+    continents_by_day_df = pd.read_csv(
+                              f'{s3_root}/data/continents_by_day.csv',
+                              storage_options=s3_storage_options)
 
     continents_by_day_df.date = pd.to_datetime(continents_by_day_df.date,
                                                format='%Y-%m-%d')
 
     # Adding vaccinations tabs
     vaccinations_by_continent_df = pd.read_csv(
-                                        f'{s3_root}/data/vaccinations_by_continent_by_day.csv')
+                                        f'{s3_root}/data/vaccinations_by_continent_by_day.csv',
+                                        storage_options=s3_storage_options)
 
     vaccinations_by_continent_df.date = pd.to_datetime(
                                             vaccinations_by_continent_df.date,
