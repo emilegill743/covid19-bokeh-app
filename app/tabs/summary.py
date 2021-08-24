@@ -18,7 +18,7 @@ def build_summary_tab():
       'secret': os.getenv('AWS_SECRET_ACCESS_KEY')
     }
 
-    s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
+    s3_root = 's3://covid19-bokeh-app'
 
     # Import global by day dataset
     global_by_day_df = pd.read_csv(

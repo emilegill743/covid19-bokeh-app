@@ -27,7 +27,7 @@ def build_time_evolution_tab():
                     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
 
     # Importing geographical shapefile
-    s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
+    s3_root = 's3://covid19-bokeh-app'
 
     response = s3_client.get_object(
                 Bucket='covid19-bokeh-app',

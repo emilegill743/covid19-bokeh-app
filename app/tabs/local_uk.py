@@ -27,7 +27,7 @@ def build_local_uk_tab():
                     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
                     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
 
-    s3_root = 'https://covid19-bokeh-app.s3.eu-west-2.amazonaws.com'
+    s3_root = 's3://covid19-bokeh-app'
 
     response = s3_client.get_object(
                     Bucket='covid19-bokeh-app',
