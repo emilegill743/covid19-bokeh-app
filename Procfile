@@ -1,1 +1,1 @@
-web: bokeh serve --port=$PORT --address=0.0.0.0 --allow-websocket-origin=covid19-bokeh-app.herokuapp.com --allow-websocket-origin=covid19-bokeh-app.emilegill.com --use-xheaders app
+web: bokeh serve --port=$PORT --address=0.0.0.0 --allow-websocket-origin=covid19-bokeh-app.herokuapp.com --allow-websocket-origin=covid19-bokeh-app.emilegill.com --use-xheaders app --log-level=debug
